@@ -28,7 +28,9 @@ if selected == "Accueil":
     st.subheader("📁 Choisir un fichier Excel")
     uploaded_file = st.file_uploader("Téléversez un fichier Excel", type=["xlsx"])
     
-    if uploaded_file:
+    # Fonction pour charger et traiter le fichier Excel, avec mise en cache
+    @st.cache_data
+    def charger_fichier_excel(uploaded_file):
         # Charger la feuille normalisation qui contient les bonnes données
         df = pd.read_excel(uploaded_file, sheet_name='normalisation')
         
@@ -38,7 +40,14 @@ if selected == "Accueil":
         else:
             # Sinon, on va les normaliser
             df['Nom de la gare'] = df['Nom de la gare'].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
-        # Stockage du df
+        
+        return df
+    
+    if uploaded_file:
+        # Appeler la fonction pour charger le fichier
+        df = charger_fichier_excel(uploaded_file)
+        
+        # Stockage du df dans l'état de session
         st.session_state.df = df 
         st.success("Fichier chargé avec succès")
         
